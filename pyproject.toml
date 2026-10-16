@@ -12,6 +12,8 @@ dependencies = [
     "pytest>=8.2.0",
     "deepeval>=1.0.0",
     "python-dotenv>=1.0.1",
+    "pydantic>=2.7,<3",
+    "PyYAML>=6.0,<7",
 ]
 
 [dependency-groups]

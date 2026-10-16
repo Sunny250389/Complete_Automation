@@ -11,7 +11,7 @@ from deepeval import login
 from deepeval.test_case import LLMTestCase
 
 from complete_automation.config.settings import DATA_DIR, REPORTS_DIR
-from complete_automation.core.llm_app import run_llm
+from complete_automation.llm.app import run_llm
 from complete_automation.reporting.report_manager import create_run_directory
 from complete_automation.utils.excel_reader import read_llm_test_data
 
