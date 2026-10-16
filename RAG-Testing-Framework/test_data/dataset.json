@@ -1,0 +1,12 @@
+[
+  {
+    "query": "What is RAG?",
+    "expected_answer": "Retrieval-Augmented Generation",
+    "context": "RAG is a method that combines retrieval with generation."
+  },
+  {
+    "query": "Explain embeddings",
+    "expected_answer": "vector representation",
+    "context": "Embeddings convert text into vectors."
+  }
+]

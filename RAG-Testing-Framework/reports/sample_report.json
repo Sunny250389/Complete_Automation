@@ -1,0 +1,7 @@
+{
+  "query": "What is RAG?",
+  "relevance": "YES",
+  "groundedness": "YES",
+  "faithfulness": "YES",
+  "confidence": 0.92
+}

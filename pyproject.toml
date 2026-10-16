@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "complete-automation"
+version = "0.1.0"
+description = "Unified Python test automation framework: UI, API, database, ML and LLM evaluation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pytest>=8.2.0",
+    "deepeval>=1.0.0",
+    "python-dotenv>=1.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/complete_automation"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --tb=short"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+markers = [
+    "smoke: quick health checks for llm app",
+    "regression: full llm evaluation sweep",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

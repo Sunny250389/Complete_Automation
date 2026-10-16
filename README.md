@@ -1,68 +1,31 @@
 # Complete_Automation
-This framework can automate UI, API, and LLM models
 
-World-class pytest automation foundation for LLM evaluation using DeepEval.
+A Python test automation framework. It is being built in phases; see the architecture plan for the full scope.
 
-## Framework Highlights
+## Current state (Phase 0)
 
-- **LLM-first project structure** with reusable modules for metrics, app wrappers, config, utilities, and reports.
-- **Excel-driven test data** (`.xlsx`) so QA and product teams can maintain cases without touching Python code.
-- **Centralized setup/teardown** through `conftest.py` fixtures.
-- **Pytest-ready defaults** with `pytest.ini` conventions and discoverable test locations.
-- **DeepEval integration** for `AnswerRelevancyMetric` and `ContextualPrecisionMetric`.
+- `src/complete_automation/`: the LLM evaluation package, moved from `LLM_Automation/` unchanged apart from import paths. It is restructured in Phase 1.
+- `tests/llm/`: DeepEval suites. They need a judge model and API key to run.
+- `tests/unit/`: offline checks on the dataset and xlsx reader.
+- `data/llm/eval_cases.xlsx` and `eval_cases.json`: seed dataset, six cases. The two files hold the same rows.
+- `RAG-Testing-Framework/`: prototype, not yet part of the package. It is migrated in Phase 4.
 
-## Folder Structure
+## Quick start
 
-```text
-.
-├── llm_automation/
-│   ├── __init__.py
-│   ├── config/
-│   │   ├── __init__.py
-│   │   └── settings.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   └── llm_app.py
-│   ├── data/
-│   │   └── testdata/
-│   │       └── llm_eval_cases.xlsx
-│   ├── metrics/
-│   │   ├── __init__.py
-│   │   └── deepeval_metrics.py
-│   ├── reporting/
-│   │   ├── __init__.py
-│   │   └── report_manager.py
-│   ├── tests/
-│   │   ├── __init__.py
-│   │   ├── conftest.py
-│   │   ├── test_answer_relevancy.py
-│   │   └── test_contextual_precision.py
-│   └── utils/
-│       ├── __init__.py
-│       └── excel_reader.py
-├── pytest.ini
-└── requirements.txt
-```
-
-## Quick Start
+Requires Python 3.12 or later and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-pytest
+uv sync --locked
+uv run ruff check src tests
+uv run pytest --collect-only -q   # collects every test without running it
+uv run pytest tests/unit          # offline unit tests
 ```
 
-## Environment Variables
+## Environment variables
 
-- `CONFIDENT_API_KEY`: Optional. If present, logs into Confident AI in session setup.
-- `DEEPEVAL_MODEL`: Optional model selector (default `gpt-4.1`).
-- `CONFIDENT_ALIAS`: Optional alias for dataset/reporting flows.
-- `LOG_LEVEL`: Optional logging level.
+Set these in a local `.env` file. Never commit `.env`.
 
-## Extend This Framework
-
-1. Replace `llm_automation/core/llm_app.py` with your actual LLM app or agent call.
-2. Add new rows to `llm_automation/data/testdata/llm_eval_cases.xlsx`.
-3. Add new metric files under `llm_automation/metrics` and tests under `llm_automation/tests`.
-4. Add CI pipeline steps to execute `pytest` and publish `reports/` artifacts.
+- `CONFIDENT_API_KEY`: optional. If set, logs into Confident AI at session start.
+- `DEEPEVAL_MODEL`: judge model for DeepEval (default `gpt-4.1`).
+- `CONFIDENT_ALIAS`: optional alias for Confident AI datasets and reports. Not yet used by code.
+- `LOG_LEVEL`: logging level (default `INFO`). Not yet used by code.

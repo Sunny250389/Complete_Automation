@@ -1,0 +1,38 @@
+[
+  {
+    "input": "Who was the president of the United States in 2021?",
+    "expected_output": "Joe Biden",
+    "retrieval_context": "Joe Biden served as the 46th president of the United States from January 2021 to January 2025.",
+    "case_id": "llm-001"
+  },
+  {
+    "input": "Who built the Claude models?",
+    "expected_output": "Anthropic built Claude models.",
+    "retrieval_context": "Anthropic is an AI safety company that develops the Claude family of models.",
+    "case_id": "llm-002"
+  },
+  {
+    "input": "Who introduced the GPT models?",
+    "expected_output": "OpenAI introduced GPT models.",
+    "retrieval_context": "OpenAI developed the GPT family of large language models.",
+    "case_id": "llm-003"
+  },
+  {
+    "input": "What is retrieval-augmented generation?",
+    "expected_output": "Retrieval-augmented generation combines document retrieval with text generation.",
+    "retrieval_context": "RAG is a method that combines retrieval with generation.",
+    "case_id": "llm-004"
+  },
+  {
+    "input": "What is an embedding?",
+    "expected_output": "An embedding is a vector representation of text.",
+    "retrieval_context": "Embeddings convert text into vectors.",
+    "case_id": "llm-005"
+  },
+  {
+    "input": "What is the capital of France?",
+    "expected_output": "Paris is the capital of France.",
+    "retrieval_context": "Paris is the capital and largest city of France.",
+    "case_id": "llm-006"
+  }
+]
