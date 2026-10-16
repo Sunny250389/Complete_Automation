@@ -1,11 +1,17 @@
-"""Read xlsx datasets without requiring pandas/openpyxl dependencies."""
+"""LLM evaluation rows from an xlsx workbook.
+
+Kept for the LLM suite. Workbook parsing now lives in
+``complete_automation.core.datasets``; this module only maps rows to
+``LLMTestData``. Columns are read by position (input, expected output,
+retrieval context); extra columns such as ``case_id`` are ignored.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import xml.etree.ElementTree as ET
-import zipfile
+
+from complete_automation.core.datasets import read_xlsx_rows
 
 
 @dataclass
@@ -16,26 +22,9 @@ class LLMTestData:
 
 
 def read_llm_test_data(path: Path) -> list[LLMTestData]:
-    """Load rows from a minimal xlsx file with fixed column order."""
-    with zipfile.ZipFile(path) as workbook:
-        shared_strings = _read_shared_strings(workbook)
-        sheet = ET.fromstring(workbook.read("xl/worksheets/sheet1.xml"))
-
-    namespace = {"x": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
-    rows = sheet.findall(".//x:sheetData/x:row", namespace)
+    """Load rows from an xlsx file with fixed column order, skipping the header row."""
     parsed: list[LLMTestData] = []
-
-    for row in rows[1:]:  # skip header
-        values: list[str] = []
-        for cell in row.findall("x:c", namespace):
-            cell_type = cell.attrib.get("t")
-            value_node = cell.find("x:v", namespace)
-            raw = "" if value_node is None else value_node.text or ""
-            if cell_type == "s" and raw:
-                values.append(shared_strings[int(raw)])
-            else:
-                values.append(raw)
-
+    for values in read_xlsx_rows(path)[1:]:
         if len(values) >= 3:
             parsed.append(
                 LLMTestData(
@@ -44,11 +33,4 @@ def read_llm_test_data(path: Path) -> list[LLMTestData]:
                     retrieval_context=values[2],
                 )
             )
-
     return parsed
-
-
-def _read_shared_strings(workbook: zipfile.ZipFile) -> list[str]:
-    namespace = {"x": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
-    root = ET.fromstring(workbook.read("xl/sharedStrings.xml"))
-    return [node.find("x:t", namespace).text or "" for node in root.findall("x:si", namespace)]

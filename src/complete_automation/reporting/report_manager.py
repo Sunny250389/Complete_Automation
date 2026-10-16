@@ -1,6 +1,11 @@
-"""Manage report directories for pytest and evaluation outputs."""
+"""Manage report directories for pytest and evaluation outputs.
 
-from datetime import datetime, UTC
+Kept for existing callers. New code should use
+``complete_automation.core.artifacts.LocalArtifactStore`` and
+``complete_automation.core.reporting.JsonReporter``.
+"""
+
+from datetime import UTC, datetime
 from pathlib import Path
 
 

@@ -1,0 +1,12 @@
+# Automated runs (CI). Select with CAUTO_ENVIRONMENT=test or --cauto-env test.
+logging:
+  level: INFO
+  format: json
+reporting:
+  output_dir: reports
+  json_enabled: true
+artifacts:
+  root: artifacts
+retry:
+  max_attempts: 3
+  delay_seconds: 1.0

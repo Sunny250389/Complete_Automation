@@ -1,0 +1,11 @@
+# Local development (the default environment).
+# Relative paths resolve against the repository root (the parent of config/).
+# Never put secrets here: use environment variables or a local .env file.
+logging:
+  level: INFO
+  format: text
+reporting:
+  output_dir: reports
+  json_enabled: false
+artifacts:
+  root: artifacts
