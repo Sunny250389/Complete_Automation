@@ -109,6 +109,27 @@ def test_write_failures_are_raised_not_swallowed(tmp_path: Path) -> None:
     assert isinstance(raised.value.__cause__, OSError)
 
 
+def test_failed_cleanup_does_not_mask_the_write_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Linux raises NotADirectoryError from unlink() here; Windows does not. Force it on any OS."""
+
+    def failing_replace(*args: object) -> None:
+        raise PermissionError("target is locked")
+
+    def failing_unlink(self: Path, missing_ok: bool = False) -> None:
+        raise NotADirectoryError("parent is a file")
+
+    reporter = JsonReporter(tmp_path / "results.json")
+    reporter.publish(result("a", Status.PASSED))
+    monkeypatch.setattr("complete_automation.core.reporting.os.replace", failing_replace)
+    monkeypatch.setattr(Path, "unlink", failing_unlink)
+
+    with pytest.raises(ReportingError, match="cannot write JSON report") as raised:
+        reporter.finalize()
+    assert isinstance(raised.value.__cause__, PermissionError)
+
+
 def test_report_is_redacted(tmp_path: Path) -> None:
     reporter = JsonReporter(tmp_path / "r.json")
     reporter.publish(

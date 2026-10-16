@@ -46,6 +46,19 @@ class RunSummary(StatusCounts):
     by_module: dict[str, StatusCounts] = Field(default_factory=dict)
 
 
+def _discard(path: Path) -> None:
+    """Best-effort removal of a leftover temporary file.
+
+    Never raises: the write failure that led here is the error worth reporting,
+    and which ``OSError`` a missing parent produces differs by platform
+    (``FileNotFoundError`` on Windows, ``NotADirectoryError`` on Linux).
+    """
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
 def _counts(results: list[TestResult]) -> dict[str, int]:
     tally = Counter(result.status.value for result in results)
     return {"total": len(results), **{status.value: tally[status.value] for status in Status}}
@@ -129,7 +142,7 @@ class JsonReporter:
             temporary.write_text(text, encoding="utf-8")
             os.replace(temporary, self.output_path)
         except OSError as error:
-            temporary.unlink(missing_ok=True)
+            _discard(temporary)
             raise ReportingError(f"cannot write JSON report to {self.output_path}") from error
         return self.output_path
 
