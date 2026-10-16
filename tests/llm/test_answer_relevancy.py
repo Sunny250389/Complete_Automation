@@ -2,7 +2,7 @@
 
 from deepeval.evaluate import evaluate
 
-from llm_automation.metrics.deepeval_metrics import answer_relevancy_metric
+from complete_automation.metrics.deepeval_metrics import answer_relevancy_metric
 
 
 def test_answer_relevancy_for_dataset(llm_test_cases):

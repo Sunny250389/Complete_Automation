@@ -10,10 +10,10 @@ from dotenv import load_dotenv
 from deepeval import login
 from deepeval.test_case import LLMTestCase
 
-from llm_automation.config.settings import DATA_DIR, REPORTS_DIR
-from llm_automation.core.llm_app import run_llm
-from llm_automation.reporting.report_manager import create_run_directory
-from llm_automation.utils.excel_reader import read_llm_test_data
+from complete_automation.config.settings import DATA_DIR, REPORTS_DIR
+from complete_automation.core.llm_app import run_llm
+from complete_automation.reporting.report_manager import create_run_directory
+from complete_automation.utils.excel_reader import read_llm_test_data
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -27,7 +27,7 @@ def framework_setup() -> Path:
 
 @pytest.fixture(scope="session")
 def llm_test_cases() -> list[LLMTestCase]:
-    dataset_path = DATA_DIR / "llm_eval_cases.xlsx"
+    dataset_path = DATA_DIR / "eval_cases.xlsx"
     rows = read_llm_test_data(dataset_path)
     return [
         LLMTestCase(
