@@ -1,0 +1,13 @@
+# Opt-in live API tests against the public reqres.in demo service (tests/live/api).
+# The API key is NOT stored here: set CAUTO_MODULES__API__AUTH__VALUE in your shell or .env.
+logging:
+  level: INFO
+modules:
+  api:
+    base_url: https://reqres.in/api
+    timeouts: {connect: 5, read: 15, write: 15, pool: 5}
+    read_only: false
+    auth:
+      type: api_key
+      name: x-api-key
+      location: header
