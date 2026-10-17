@@ -2,9 +2,12 @@
 
 A Python test automation framework. It is being built in phases; see the architecture plan for the full scope.
 
-## Current state (Phase 1: shared core)
+## Current state (shared core and API automation)
 
 - `src/complete_automation/core/`: shared, domain-independent infrastructure. It covers configuration, logging and redaction, exceptions, execution context, the test result contract, JSON reporting, artifact storage, test data loaders, retry and pytest fixtures. See [docs/shared_core.md](docs/shared_core.md).
+- `src/complete_automation/api/`: API automation (optional `api` extra). It provides HTTPX sync and async clients, authentication (API key, bearer, basic, OAuth2 client credentials), assertions, JSON Schema and OpenAPI contract validation, safe retries, mocking, and fixtures. See [docs/api_automation.md](docs/api_automation.md).
+- `tests/integration/`, `tests/examples/`: API tests against a local test service on 127.0.0.1.
+- `tests/live/`: opt-in tests against real external APIs; they skip unless configured.
 - `src/complete_automation/llm/`, `metrics/`, `utils/`, `config/`, `reporting/`: the existing LLM evaluation code, kept working on top of the core.
 - `config/environments/`: `dev.yaml` (default) and `test.yaml`.
 - `tests/unit/`: offline tests, including `tests/unit/core/` for the shared core.
@@ -17,10 +20,12 @@ A Python test automation framework. It is being built in phases; see the archite
 Requires Python 3.12 or later and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --locked
+uv sync --locked --all-extras     # or --extra api; plain "uv sync --locked" installs the core only
 uv run ruff check src tests
 uv run pytest --collect-only      # collects every test without running it
 uv run pytest tests/unit          # offline unit tests
+uv run pytest -m api              # every API test (live ones skip unless configured)
+uv run pytest tests/integration tests/examples   # API tests against the local test service
 uv run pytest tests/unit --cauto-report   # also writes reports/<run_id>/results.json
 ```
 

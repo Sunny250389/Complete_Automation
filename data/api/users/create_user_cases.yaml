@@ -1,0 +1,27 @@
+# POST /users cases for the example Users API (synthetic data only).
+# Loaded with complete_automation.core.datasets.DataLoader and validated by a pydantic model.
+- case_id: valid-member
+  payload: {name: Grace Hopper, email: grace@example.test}
+  expected_status: 201
+- case_id: valid-admin
+  payload: {name: Alan Turing, email: alan@example.test, role: admin}
+  expected_status: 201
+- case_id: boundary-name-1-char
+  payload: {name: A, email: a@example.test}
+  expected_status: 201
+- case_id: missing-name
+  payload: {email: nameless@example.test}
+  expected_status: 422
+  expected_error_fields: [name]
+- case_id: invalid-email
+  payload: {name: Bad Email, email: not-an-email}
+  expected_status: 422
+  expected_error_fields: [email]
+- case_id: unknown-role
+  payload: {name: Root, email: root@example.test, role: owner}
+  expected_status: 422
+  expected_error_fields: [role]
+- case_id: everything-wrong
+  payload: {name: "", email: "@", role: superuser}
+  expected_status: 422
+  expected_error_fields: [name, email, role]

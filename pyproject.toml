@@ -16,6 +16,13 @@ dependencies = [
     "PyYAML>=6.0,<7",
 ]
 
+[project.optional-dependencies]
+api = [
+    "httpx>=0.28,<1",
+    "jsonschema>=4.23,<5",
+    "openapi-spec-validator>=0.7,<1",
+]
+
 [dependency-groups]
 dev = [
     "ruff>=0.6.0",
@@ -33,6 +40,9 @@ testpaths = ["tests"]
 markers = [
     "smoke: quick health checks for llm app",
     "regression: full llm evaluation sweep",
+    "api: API automation tests",
+    "integration: tests that use a local service (no external network)",
+    "live: tests against a real external service; opt-in through configuration",
 ]
 
 [tool.ruff]
