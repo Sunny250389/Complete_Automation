@@ -1,0 +1,167 @@
+openapi: 3.1.0
+info:
+  title: Example Users API
+  version: 1.0.0
+  description: >
+    EXAMPLE CONTRACT for the API automation module's own tests. It describes the
+    local test service in tests/support/api_server.py, not any real product.
+    GET /legacy/users/{user_id} is documented correctly but the test service
+    deliberately breaks it, to demonstrate contract-failure detection.
+servers:
+  - url: /v1
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: {type: string, const: ok}
+  /users:
+    get:
+      operationId: listUsers
+      parameters:
+        - {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}}
+        - {name: per_page, in: query, schema: {type: integer, minimum: 1, maximum: 50, default: 2}}
+      responses:
+        "200":
+          description: One page of users
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/UserPage"}
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "422": {$ref: "#/components/responses/ValidationFailed"}
+    post:
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/NewUser"}
+      responses:
+        "201":
+          description: Created
+          headers:
+            Location:
+              required: true
+              schema: {type: string}
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/User"}
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "422": {$ref: "#/components/responses/ValidationFailed"}
+  /users/{user_id}:
+    parameters:
+      - {name: user_id, in: path, required: true, schema: {type: integer, minimum: 1}}
+    get:
+      operationId: getUser
+      responses:
+        "200":
+          description: The user
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/User"}
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+    delete:
+      operationId: deleteUser
+      responses:
+        "204": {description: Deleted}
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /legacy/users/{user_id}:
+    parameters:
+      - {name: user_id, in: path, required: true, schema: {type: integer, minimum: 1}}
+    get:
+      operationId: getLegacyUser
+      responses:
+        "200":
+          description: The user (the test service deliberately returns a non-conforming body)
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/User"}
+        "401": {$ref: "#/components/responses/Unauthorized"}
+  /error:
+    get:
+      operationId: getError
+      security: []
+      responses:
+        "500":
+          description: Always fails, to demonstrate expected server errors
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    NotFound:
+      description: No such user
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    ValidationFailed:
+      description: The request is invalid
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+  schemas:
+    Role:
+      type: string
+      enum: [admin, member]
+    NewUser:
+      type: object
+      additionalProperties: false
+      required: [name, email]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 100}
+        email: {type: string, format: email}
+        role: {$ref: "#/components/schemas/Role"}
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, name, email, role, created_at]
+      properties:
+        id: {type: integer, minimum: 1}
+        name: {type: string}
+        email: {type: string, format: email}
+        role: {$ref: "#/components/schemas/Role"}
+        created_at: {type: string, format: date-time}
+    UserPage:
+      type: object
+      required: [page, per_page, total, total_pages, data]
+      properties:
+        page: {type: integer, minimum: 1}
+        per_page: {type: integer, minimum: 1}
+        total: {type: integer, minimum: 0}
+        total_pages: {type: integer, minimum: 0}
+        data:
+          type: array
+          items: {$ref: "#/components/schemas/User"}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: {type: string}
+        details:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: {type: string}
+              message: {type: string}
+security:
+  - bearerAuth: []

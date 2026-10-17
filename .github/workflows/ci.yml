@@ -13,8 +13,8 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
-      - name: Install locked dependencies
-        run: uv sync --locked
+      - name: Install locked dependencies (all module extras)
+        run: uv sync --locked --all-extras
 
       - name: Lint
         run: uv run ruff check src tests
@@ -24,3 +24,6 @@ jobs:
 
       - name: Unit tests (offline)
         run: uv run pytest tests/unit
+
+      - name: API integration and example tests (local service on 127.0.0.1)
+        run: uv run pytest tests/integration tests/examples
