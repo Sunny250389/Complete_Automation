@@ -25,5 +25,5 @@ jobs:
       - name: Unit tests (offline)
         run: uv run pytest tests/unit
 
-      - name: API integration and example tests (local service on 127.0.0.1)
+      - name: Integration and example tests (API local service on 127.0.0.1, database on temporary SQLite)
         run: uv run pytest tests/integration tests/examples

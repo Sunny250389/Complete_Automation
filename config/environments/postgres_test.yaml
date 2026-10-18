@@ -1,0 +1,22 @@
+# PostgreSQL integration tests. Opt in with --cauto-env postgres_test (or CAUTO_ENVIRONMENT=postgres_test).
+#
+# The tests create a scratch schema named cauto_t_<random> in the database below, build the example
+# tables inside it, and drop only that schema afterwards. This file therefore authorizes DDL and
+# destructive statements, but only on the database named in privileged_databases. Point it at a
+# disposable test database, never at a shared or production one.
+#
+# Never put credentials here. Provide them, and any host/port override, through the environment:
+#   CAUTO_MODULES__DATABASE__USERNAME, CAUTO_MODULES__DATABASE__PASSWORD,
+#   CAUTO_MODULES__DATABASE__HOST, CAUTO_MODULES__DATABASE__PORT
+modules:
+  database:
+    dialect: postgresql
+    host: localhost
+    port: 5432
+    database: cauto_test
+    access: read_write
+    allow_ddl: true
+    allow_destructive: true
+    privileged_databases: [cauto_test]
+    connect_timeout_seconds: 5
+    statement_timeout_seconds: 30
