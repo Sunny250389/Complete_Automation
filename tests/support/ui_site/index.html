@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Practice Site - Home</title>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main">
+      <a href="/form.html">Registration form</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Practice Home</h1>
+    <ul aria-label="Features">
+      <li data-testid="feature">Deterministic pages</li>
+      <li data-testid="feature">Accessible labels</li>
+      <li data-testid="feature">Stable test ids</li>
+    </ul>
+    <button type="button" id="load">Load details</button>
+    <p data-testid="details" hidden>Details loaded</p>
+  </main>
+  <script>
+    // The details appear after a short delay, so tests must rely on auto-waiting, not sleeps.
+    document.getElementById("load").addEventListener("click", function () {
+      setTimeout(function () {
+        document.querySelector('[data-testid="details"]').hidden = false;
+      }, 300);
+    });
+  </script>
+</body>
+</html>

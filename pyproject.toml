@@ -29,6 +29,9 @@ postgresql = [
     "sqlalchemy>=2.0.36,<3",
     "psycopg[binary]>=3.2,<4",
 ]
+ui = [
+    "playwright>=1.64,<2",
+]
 
 [dependency-groups]
 dev = [
@@ -49,6 +52,7 @@ markers = [
     "regression: full llm evaluation sweep",
     "api: API automation tests",
     "database: database testing module tests",
+    "ui: UI automation tests (Playwright; need the ui extra and an installed browser)",
     "postgresql: need a configured PostgreSQL server; skipped otherwise",
     "integration: tests that use a local service (no external network)",
     "live: tests against a real external service; opt-in through configuration",
