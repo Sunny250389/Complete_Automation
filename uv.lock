@@ -414,6 +414,10 @@ api = [
 database = [
     { name = "sqlalchemy" },
 ]
+llm = [
+    { name = "httpx" },
+    { name = "jsonschema" },
+]
 ml = [
     { name = "numpy" },
     { name = "pandas" },
@@ -436,7 +440,9 @@ dev = [
 requires-dist = [
     { name = "deepeval", specifier = ">=1.0.0" },
     { name = "httpx", marker = "extra == 'api'", specifier = ">=0.28,<1" },
+    { name = "httpx", marker = "extra == 'llm'", specifier = ">=0.28,<1" },
     { name = "jsonschema", marker = "extra == 'api'", specifier = ">=4.23,<5" },
+    { name = "jsonschema", marker = "extra == 'llm'", specifier = ">=4.23,<5" },
     { name = "numpy", marker = "extra == 'ml'", specifier = ">=2.0,<3" },
     { name = "openapi-spec-validator", marker = "extra == 'api'", specifier = ">=0.7,<1" },
     { name = "pandas", marker = "extra == 'ml'", specifier = ">=2.2,<4" },
@@ -450,7 +456,7 @@ requires-dist = [
     { name = "sqlalchemy", marker = "extra == 'database'", specifier = ">=2.0.36,<3" },
     { name = "sqlalchemy", marker = "extra == 'postgresql'", specifier = ">=2.0.36,<3" },
 ]
-provides-extras = ["api", "database", "postgresql", "ui", "ml"]
+provides-extras = ["api", "database", "postgresql", "ui", "llm", "ml"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.6.0" }]

@@ -1,0 +1,17 @@
+# Opt-in real-model tests against a local Ollama server (see docs/llm_evaluation.md).
+# The model under test is deliberately not set here: export
+#   CAUTO_MODULES__LLM_EVALUATION__MODEL=<a name from `ollama list`>
+# and optionally CAUTO_MODULES__LLM_EVALUATION__JUDGE_MODEL.
+logging:
+  level: INFO
+  format: json
+reporting:
+  output_dir: reports
+  json_enabled: true
+artifacts:
+  root: artifacts
+modules:
+  llm_evaluation:
+    base_url: http://localhost:11434
+    timeout_seconds: 300
+    live: true
