@@ -32,6 +32,11 @@ postgresql = [
 ui = [
     "playwright>=1.64,<2",
 ]
+ml = [
+    "numpy>=2.0,<3",
+    "pandas>=2.2,<4",
+    "scikit-learn>=1.5,<2",
+]
 
 [dependency-groups]
 dev = [
@@ -52,6 +57,7 @@ markers = [
     "regression: full llm evaluation sweep",
     "api: API automation tests",
     "database: database testing module tests",
+    "ml: ML model evaluation tests (need the ml extra: numpy, pandas, scikit-learn)",
     "ui: UI automation tests (Playwright; need the ui extra and an installed browser)",
     "postgresql: need a configured PostgreSQL server; skipped otherwise",
     "integration: tests that use a local service (no external network)",

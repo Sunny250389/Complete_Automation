@@ -2,12 +2,13 @@
 
 A Python test automation framework. It is being built in phases; see the architecture plan for the full scope.
 
-## Current state (shared core, API automation, database testing and UI automation)
+## Current state (shared core, API automation, database testing, UI automation and ML evaluation)
 
 - `src/complete_automation/core/`: shared, domain-independent infrastructure. It covers configuration, logging and redaction, exceptions, execution context, the test result contract, JSON reporting, artifact storage, test data loaders, retry and pytest fixtures. See [docs/shared_core.md](docs/shared_core.md).
 - `src/complete_automation/api/`: API automation (optional `api` extra). It provides HTTPX sync and async clients, authentication (API key, bearer, basic, OAuth2 client credentials), assertions, JSON Schema and OpenAPI contract validation, safe retries, mocking, and fixtures. See [docs/api_automation.md](docs/api_automation.md).
 - `src/complete_automation/database/`: database testing (optional `database` and `postgresql` extras). It provides SQLite and PostgreSQL adapters, safe parameterized SQL execution, explicit transactions, read-only and destructive-operation safeguards, CRUD, integrity and schema validation, reconciliation, and fixtures. See [docs/database_testing.md](docs/database_testing.md).
 - `src/complete_automation/ui/`: UI automation (optional `ui` extra). It provides Playwright browser lifecycle (Chromium, Firefox, WebKit), page objects, UI assertions, per-test failure diagnostics (screenshots, console log, optional trace and video) and fixtures. See [docs/ui_automation.md](docs/ui_automation.md).
+- `src/complete_automation/ml/`: ML model evaluation (optional `ml` extra: numpy, pandas, scikit-learn). It evaluates classification, regression and clustering models (or precomputed predictions) with validated datasets, metrics with explicit undefined handling, threshold quality gates, baseline comparison, opt-in robustness checks, JSON/CSV reports and fixtures. It never trains or serves models. See [docs/ml_evaluation.md](docs/ml_evaluation.md).
 - `tests/integration/`, `tests/examples/`: API tests against a local test service on 127.0.0.1, database tests against temporary SQLite databases, and UI tests in a real browser against a local practice site.
 - `tests/live/`: opt-in tests against real external APIs; they skip unless configured.
 - `src/complete_automation/llm/`, `metrics/`, `utils/`, `config/`, `reporting/`: the existing LLM evaluation code, kept working on top of the core.
@@ -30,6 +31,7 @@ uv run pytest tests/unit          # offline unit tests
 uv run pytest -m api              # every API test (live ones skip unless configured)
 uv run pytest tests/integration tests/examples   # API tests against the local test service, database tests on SQLite
 uv run pytest -m ui               # every UI test (needs the ui extra and an installed browser)
+uv run pytest -m ml               # ML evaluation tests (unit, integration, examples)
 uv run pytest -m database         # every database test (PostgreSQL ones skip unless configured)
 uv run pytest -m postgresql --cauto-env postgres_test   # PostgreSQL tests; see docs/database_testing.md
 uv run pytest tests/unit --cauto-report   # also writes reports/<run_id>/results.json
