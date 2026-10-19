@@ -1,0 +1,14 @@
+# Example: UI tests against an application running on this machine.
+# Select with --cauto-env ui_local (or CAUTO_ENVIRONMENT=ui_local). Adjust base_url to your application.
+# Credentials never go here: read them from environment variables in your tests.
+logging:
+  level: INFO
+modules:
+  ui:
+    base_url: http://127.0.0.1:3000
+    browser: chromium
+    headless: true
+    viewport: {width: 1280, height: 720}
+    screenshot: on_failure
+    trace: off
+    video: off

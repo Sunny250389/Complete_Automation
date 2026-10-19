@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Practice Site - Registration</title>
+</head>
+<body>
+  <main>
+    <h1>Create an account</h1>
+    <form id="signup" novalidate>
+      <p>
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="off">
+        <span data-testid="name-error" role="alert" class="error"></span>
+      </p>
+      <p>
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="off">
+        <span data-testid="email-error" role="alert" class="error"></span>
+      </p>
+      <p>
+        <label for="country">Country</label>
+        <select id="country" name="country">
+          <option value="">Choose a country</option>
+          <option value="ca">Canada</option>
+          <option value="de">Germany</option>
+          <option value="in">India</option>
+        </select>
+      </p>
+      <fieldset>
+        <legend>Plan</legend>
+        <label><input type="radio" name="plan" value="free" checked> Free</label>
+        <label><input type="radio" name="plan" value="pro"> Pro</label>
+      </fieldset>
+      <p>
+        <label><input id="newsletter" type="checkbox" name="newsletter" disabled> Send me the newsletter (Pro only)</label>
+      </p>
+      <p>
+        <label><input id="terms" type="checkbox" name="terms"> I accept the terms</label>
+        <span data-testid="terms-error" role="alert" class="error"></span>
+      </p>
+      <button type="submit">Create account</button>
+    </form>
+    <div data-testid="confirmation" role="status" hidden></div>
+  </main>
+  <script>
+    var form = document.getElementById("signup");
+    function setError(id, message) {
+      document.querySelector('[data-testid="' + id + '"]').textContent = message;
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="plan"]'), function (radio) {
+      radio.addEventListener("change", function () {
+        document.getElementById("newsletter").disabled = form.elements.plan.value !== "pro";
+      });
+    });
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var name = form.elements.name.value.trim();
+      var email = form.elements.email.value.trim();
+      var valid = true;
+      setError("name-error", name ? "" : "Full name is required");
+      valid = valid && !!name;
+      var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+      setError("email-error", emailOk ? "" : "Enter a valid email address");
+      valid = valid && emailOk;
+      var termsOk = form.elements.terms.checked;
+      setError("terms-error", termsOk ? "" : "You must accept the terms");
+      valid = valid && termsOk;
+      if (!valid) { return; }
+      var select = form.elements.country;
+      var country = select.options[select.selectedIndex].text;
+      var box = document.querySelector('[data-testid="confirmation"]');
+      box.textContent = "Welcome, " + name + "! Plan: " + form.elements.plan.value +
+        ", country: " + (select.value ? country : "none");
+      box.hidden = false;
+      form.hidden = true;
+      history.replaceState(null, "", "#submitted");
+    });
+  </script>
+</body>
+</html>
