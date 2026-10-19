@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "baseline_id": "example-binary",
+  "task": "classification",
+  "model_id": "example-model",
+  "dataset_id": "binary-predictions",
+  "dataset_fingerprint": "e966fde0523cfda0b622c18e291d298000c31e28b4f65e5f0cd9b343e26ffb73",
+  "metrics": {
+    "accuracy": 0.8333333333333334,
+    "f1_binary": 0.8333333333333334,
+    "recall_binary": 0.8333333333333334
+  }
+}
