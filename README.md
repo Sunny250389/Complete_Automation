@@ -2,7 +2,9 @@
 
 A Python test automation framework. It is being built in phases; see the architecture plan for the full scope.
 
-## Current state (shared core, API automation, database testing, UI automation, ML evaluation and LLM evaluation)
+## Current state (shared core, API automation, database testing, UI automation, ML evaluation, LLM evaluation, and their integration and CI)
+
+How the modules fit together, how to select and run tests, the cross-module workflows, reports and the CI pipeline are described in [docs/integration_and_ci.md](docs/integration_and_ci.md).
 
 - `src/complete_automation/core/`: shared, domain-independent infrastructure. It covers configuration, logging and redaction, exceptions, execution context, the test result contract, JSON reporting, artifact storage, test data loaders, retry and pytest fixtures. See [docs/shared_core.md](docs/shared_core.md).
 - `src/complete_automation/api/`: API automation (optional `api` extra). It provides HTTPX sync and async clients, authentication (API key, bearer, basic, OAuth2 client credentials), assertions, JSON Schema and OpenAPI contract validation, safe retries, mocking, and fixtures. See [docs/api_automation.md](docs/api_automation.md).
@@ -11,11 +13,13 @@ A Python test automation framework. It is being built in phases; see the archite
 - `src/complete_automation/ml/`: ML model evaluation (optional `ml` extra: numpy, pandas, scikit-learn). It evaluates classification, regression and clustering models (or precomputed predictions) with validated datasets, metrics with explicit undefined handling, threshold quality gates, baseline comparison, opt-in robustness checks, JSON/CSV reports and fixtures. It never trains or serves models. See [docs/ml_evaluation.md](docs/ml_evaluation.md).
 - `src/complete_automation/llm_evaluation/`: LLM evaluation (optional `llm` extra: httpx, jsonschema). It calls a real Ollama model, captures the actual response, evaluates it with deterministic checks and an optional separate judge model, applies quality gates, compares against baselines and reports through the shared core. See [docs/llm_evaluation.md](docs/llm_evaluation.md). (`src/complete_automation/llm/`, `metrics/` and `tests/llm/` below are the older DeepEval prototype.)
 - `tests/integration/`, `tests/examples/`: API tests against a local test service on 127.0.0.1, database tests against temporary SQLite databases, and UI tests in a real browser against a local practice site.
+- `tests/integration/cross_module/`: workflows that combine the API, database and UI modules against a local users application (`tests/support/users_app.py`), and a check that every module reports correctly into one run report.
 - `tests/live/`: opt-in tests against real external APIs; they skip unless configured.
+- `.github/workflows/ci.yml`: static validation, offline unit tests and local integration tests, with reports, artifacts and a job summary.
 - `src/complete_automation/llm/`, `metrics/`, `utils/`, `config/`, `reporting/`: the existing LLM evaluation code, kept working on top of the core.
 - `config/environments/`: `dev.yaml` (default), `test.yaml`, `postgres_test.yaml` (opt-in PostgreSQL tests), and `ui_local.yaml` (example for UI tests against a local application), and `ollama_local.yaml` (opt-in real-model LLM tests against a local Ollama).
 - `tests/unit/`: offline tests, including `tests/unit/core/` for the shared core.
-- `tests/llm/`: DeepEval suites. They need a judge model and an API key to run.
+- `tests/llm/`: DeepEval suites. They need a judge model: without `OPENAI_API_KEY` they skip with that reason.
 - `data/llm/eval_cases.xlsx` and `eval_cases.json`: seed dataset, six cases. The two files hold the same rows.
 - `RAG-Testing-Framework/`: prototype, not yet part of the package.
 
@@ -28,16 +32,22 @@ uv sync --locked --all-extras     # or --extra api, --extra ui; plain "uv sync -
 uv run playwright install chromium   # browser for the UI tests (or firefox, webkit)
 uv run ruff check src tests
 uv run pytest --collect-only      # collects every test without running it
-uv run pytest tests/unit          # offline unit tests
+uv run pytest tests/unit          # offline unit tests, every module
+uv run pytest tests/unit/core     # shared core only
 uv run pytest -m api              # every API test (live ones skip unless configured)
-uv run pytest tests/integration tests/examples   # API tests against the local test service, database tests on SQLite
+uv run pytest tests/integration tests/examples   # local integration tests: API service, SQLite, browser, cross-module
+uv run pytest -m cross_module     # cross-module workflows (add 'and not ui' to leave out the browser)
 uv run pytest -m ui               # every UI test (needs the ui extra and an installed browser)
 uv run pytest -m ml               # ML evaluation tests (unit, integration, examples)
 uv run pytest -m llm_evaluation   # LLM evaluation tests; offline, the real-model ones skip unless opted in
 uv run pytest -m database         # every database test (PostgreSQL ones skip unless configured)
 uv run pytest -m postgresql --cauto-env postgres_test   # PostgreSQL tests; see docs/database_testing.md
 uv run pytest tests/unit --cauto-report   # also writes reports/<run_id>/results.json
+uv run python -m complete_automation.core.summary "reports/<run_id>/results*.json"   # Markdown summary of a report
+uv run pytest                     # full regression: everything; service-dependent tests skip with their reason
 ```
+
+Real Ollama models, PostgreSQL and live APIs are opt-in; see [docs/integration_and_ci.md](docs/integration_and_ci.md#running-tests) for their commands and settings. This phase uses no Docker or Kubernetes.
 
 ## Configuration
 
@@ -47,6 +57,7 @@ Never commit `.env` or real credentials.
 
 ### LLM suite variables
 
+- `OPENAI_API_KEY`: needed by DeepEval's default judge. Without it the suite is skipped.
 - `CONFIDENT_API_KEY`: optional. If set, logs into Confident AI at session start.
 - `DEEPEVAL_MODEL`: judge model for DeepEval (default `gpt-4.1`).
 - `CONFIDENT_ALIAS`: optional alias for Confident AI datasets and reports. Not yet used by code.

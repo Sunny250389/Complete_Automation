@@ -12,6 +12,8 @@ dist/
 
 # Local secrets: commit only .env.example (names, no values)
 .env
+# DeepEval's local run cache and settings (can hold API keys)
+.deepeval/
 
 # Generated run output
 /reports/

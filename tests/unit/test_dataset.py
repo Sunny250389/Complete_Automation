@@ -2,8 +2,12 @@
 
 import json
 
+import pytest
+
 from complete_automation.config.settings import DATA_DIR
 from complete_automation.utils.excel_reader import read_llm_test_data
+
+pytestmark = pytest.mark.cauto_module("llm")
 
 
 def test_data_dir_is_inside_the_repository():

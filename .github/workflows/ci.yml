@@ -1,32 +1,133 @@
 name: CI
 
+# Static validation, then the offline unit tests and the local integration tests in parallel.
+# Nothing here needs an external service: APIs, databases, browsers and applications are local,
+# and tests that need a real external service (live APIs, a real Ollama model, PostgreSQL, the
+# DeepEval judge) skip with their reason, which the job summary lists. See docs/integration_and_ci.md.
+
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12" # the lowest version pyproject.toml allows
+  FORCE_COLOR: "1"
 
 jobs:
-  lint-and-unit:
-    runs-on: ubuntu-latest
+  static:
+    name: Static validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
 
       - name: Install locked dependencies (all module extras)
         run: uv sync --locked --all-extras
 
-      - name: Install the Playwright browser for the UI tests
-        run: uv run playwright install --with-deps chromium
-
       - name: Lint
         run: uv run ruff check src tests
+
+      - name: Compile every module
+        run: uv run python -m compileall -q src tests
 
       - name: Collect every test (no execution)
         run: uv run pytest --collect-only -q
 
-      - name: Unit tests (offline)
-        run: uv run pytest tests/unit
+  unit:
+    name: Offline unit tests
+    needs: static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - name: Integration and example tests (API local service on 127.0.0.1, database on temporary SQLite, UI in headless Chromium against a local site)
-        run: uv run pytest tests/integration tests/examples
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies (all module extras)
+        run: uv sync --locked --all-extras
+
+      - name: Unit tests (no network, browser, database server or model)
+        run: uv run pytest tests/unit --cauto-env test --junitxml=reports/junit-unit.xml
+
+      - name: Job summary
+        if: always()
+        run: uv run python -m complete_automation.core.summary "reports/*/results*.json" --title "Offline unit tests" --output "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-report
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+  integration:
+    name: Local integration tests
+    needs: static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies (all module extras)
+        run: uv sync --locked --all-extras
+
+      - name: Install Chromium and its system libraries
+        run: uv run playwright install --with-deps chromium
+
+      - name: Integration, cross-module and example tests (local API services, temporary SQLite, headless Chromium)
+        run: uv run pytest tests/integration tests/examples --cauto-env test --junitxml=reports/junit-integration.xml
+
+      - name: Job summary
+        if: always()
+        run: uv run python -m complete_automation.core.summary "reports/*/results*.json" --title "Local integration tests" --output "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-report
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload test artifacts (API exchanges, database histories, screenshots, evaluations)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-artifacts
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -18,6 +18,8 @@ from complete_automation.core.datasets import (
 )
 from complete_automation.core.exceptions import TestDataError
 
+pytestmark = pytest.mark.cauto_module("core")
+
 REPO_DATA = Path(__file__).resolve().parents[3] / "data"
 NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 

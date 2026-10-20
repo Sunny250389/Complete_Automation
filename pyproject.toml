@@ -67,6 +67,7 @@ markers = [
     "llm_evaluation: LLM evaluation module tests (offline unless marked llm_live; need the llm extra)",
     "llm_live: call a real Ollama model; opt-in through modules.llm_evaluation.live",
     "integration: tests that use a local service (no external network)",
+    "cross_module: workflows that combine several testing modules against one local application",
     "live: tests against a real external service; opt-in through configuration",
 ]
 

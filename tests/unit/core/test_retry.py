@@ -6,6 +6,8 @@ from complete_automation.core.config import RetrySettings
 from complete_automation.core.exceptions import RetryExhaustedError
 from complete_automation.core.retry import RetryPolicy, call_with_retry, retrying
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 class Flaky:
     """Raises the given errors in order, then returns "ok"."""

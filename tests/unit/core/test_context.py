@@ -18,6 +18,8 @@ from complete_automation.core.context import (
     use_test_context,
 )
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 def make_test_context(test_id: str = "tests/a.py::t") -> TestContext:
     return TestContext(run_id="run-1", test_id=test_id, name="t", module="unit")

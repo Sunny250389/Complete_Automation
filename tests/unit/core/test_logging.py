@@ -23,6 +23,8 @@ from complete_automation.core.log import (
 )
 from complete_automation.core.redaction import Redactor
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 @pytest.fixture(autouse=True)
 def _clean_logging() -> Iterator[None]:

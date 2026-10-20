@@ -3,6 +3,8 @@ from pydantic import BaseModel, SecretStr
 
 from complete_automation.core.redaction import Redactor
 
+pytestmark = pytest.mark.cauto_module("core")
+
 redactor = Redactor()
 
 
