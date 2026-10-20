@@ -15,7 +15,9 @@ import pytest
 pytestmark = [pytest.mark.cross_module, pytest.mark.cauto_module("cross_module")]
 
 DOMAINS = ("api", "database", "ui", "ml", "llm_evaluation")
-REQUIRES = {"api": "httpx", "database": "sqlalchemy", "ui": "playwright", "ml": "sklearn", "llm_evaluation": "httpx"}
+# A package only that module's extra installs ("llm" installs httpx too, so the API module is keyed on its validator).
+REQUIRES = {"api": "openapi_spec_validator", "database": "sqlalchemy", "ui": "playwright", "ml": "sklearn",
+            "llm_evaluation": "jsonschema"}
 TARGETS = [
     *(f"complete_automation.{name}" for name in DOMAINS),
     *(f"complete_automation.{name}.pytest_plugin" for name in DOMAINS),

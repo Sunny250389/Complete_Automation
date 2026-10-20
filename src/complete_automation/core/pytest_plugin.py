@@ -30,7 +30,6 @@ otherwise the folder under ``tests/`` is used.
 from __future__ import annotations
 
 import logging
-import os
 import re
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
@@ -153,8 +152,9 @@ def pytest_configure(config: pytest.Config) -> None:
     configure_logging(settings.logging, redactor=settings.redactor())
     run = RunContext.start(settings.environment, run_id=settings.execution.run_id)
     reporter = None
-    if config.getoption("--cauto-report") or settings.reporting.json_enabled:
-        reporter = JsonReporter(_report_path(settings, run), redactor=settings.redactor())
+    # Under pytest-xdist the controller runs no tests: only the workers report, so no empty report claims the run.
+    if (config.getoption("--cauto-report") or settings.reporting.json_enabled) and not _is_xdist_controller(config):
+        reporter = JsonReporter(_report_path(config, settings, run), redactor=settings.redactor())
         reporter.start_run(run)
     config.stash[_STATE] = _State(settings, run, reporter, activate_run_context(run))
 
@@ -236,8 +236,15 @@ def result_recorder(request: pytest.FixtureRequest) -> ResultRecorder:
     return recorder
 
 
-def _report_path(settings: FrameworkSettings, run: RunContext) -> Path:
-    worker = os.environ.get("PYTEST_XDIST_WORKER")
+def _is_xdist_controller(config: pytest.Config) -> bool:
+    """The process that hands tests to pytest-xdist workers and runs none itself."""
+    return not hasattr(config, "workerinput") and bool(getattr(config.option, "numprocesses", None))
+
+
+def _report_path(config: pytest.Config, settings: FrameworkSettings, run: RunContext) -> Path:
+    # xdist marks its workers on their config; the PYTEST_XDIST_WORKER variable would also be
+    # inherited by any pytest session a test starts, which is not a worker.
+    worker = getattr(config, "workerinput", {}).get("workerid")
     name = f"results-{worker}.json" if worker else "results.json"
     return settings.reporting.output_dir / run.run_id / name
 

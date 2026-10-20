@@ -80,6 +80,7 @@ def test_the_connection_context_manager_releases_after_errors(example_database: 
 
 def test_a_failing_close_is_reported_as_a_cleanup_error(example_database: EngineManager, monkeypatch: pytest.MonkeyPatch) -> None:
     db = example_database.session()
+    real_close = db.connection.close
 
     def broken_close() -> None:
         raise sa_exc.OperationalError("close", {}, Exception("socket reset"))
@@ -88,6 +89,7 @@ def test_a_failing_close_is_reported_as_a_cleanup_error(example_database: Engine
 
     with pytest.raises(CleanupError, match="connection close failed"):
         db.close()
+    real_close()  # the simulated failure must not leak the real connection into later tests
 
 
 def test_cleanup_failures_do_not_hide_the_test_failure(example_database: EngineManager, monkeypatch: pytest.MonkeyPatch) -> None:

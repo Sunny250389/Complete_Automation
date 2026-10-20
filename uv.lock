@@ -398,7 +398,6 @@ name = "complete-automation"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "deepeval" },
     { name = "pydantic" },
     { name = "pytest" },
     { name = "python-dotenv" },
@@ -413,6 +412,9 @@ api = [
 ]
 database = [
     { name = "sqlalchemy" },
+]
+deepeval = [
+    { name = "deepeval" },
 ]
 llm = [
     { name = "httpx" },
@@ -438,7 +440,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "deepeval", specifier = ">=1.0.0" },
+    { name = "deepeval", marker = "extra == 'deepeval'", specifier = ">=1.0.0" },
     { name = "httpx", marker = "extra == 'api'", specifier = ">=0.28,<1" },
     { name = "httpx", marker = "extra == 'llm'", specifier = ">=0.28,<1" },
     { name = "jsonschema", marker = "extra == 'api'", specifier = ">=4.23,<5" },
@@ -456,7 +458,7 @@ requires-dist = [
     { name = "sqlalchemy", marker = "extra == 'database'", specifier = ">=2.0.36,<3" },
     { name = "sqlalchemy", marker = "extra == 'postgresql'", specifier = ">=2.0.36,<3" },
 ]
-provides-extras = ["api", "database", "postgresql", "ui", "llm", "ml"]
+provides-extras = ["api", "database", "postgresql", "ui", "llm", "ml", "deepeval"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.6.0" }]

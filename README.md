@@ -19,7 +19,7 @@ How the modules fit together, how to select and run tests, the cross-module work
 - `src/complete_automation/llm/`, `metrics/`, `utils/`, `config/`, `reporting/`: the existing LLM evaluation code, kept working on top of the core.
 - `config/environments/`: `dev.yaml` (default), `test.yaml`, `postgres_test.yaml` (opt-in PostgreSQL tests), and `ui_local.yaml` (example for UI tests against a local application), and `ollama_local.yaml` (opt-in real-model LLM tests against a local Ollama).
 - `tests/unit/`: offline tests, including `tests/unit/core/` for the shared core.
-- `tests/llm/`: DeepEval suites. They need a judge model: without `OPENAI_API_KEY` they skip with that reason.
+- `tests/llm/`: DeepEval suites (optional `deepeval` extra; left out without it). They evaluate the stub in `src/complete_automation/llm/app.py`, not a real model, and need a judge model: without `OPENAI_API_KEY` they skip with that reason.
 - `data/llm/eval_cases.xlsx` and `eval_cases.json`: seed dataset, six cases. The two files hold the same rows.
 - `RAG-Testing-Framework/`: prototype, not yet part of the package.
 
@@ -28,7 +28,8 @@ How the modules fit together, how to select and run tests, the cross-module work
 Requires Python 3.12 or later and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --locked --all-extras     # or --extra api, --extra ui; plain "uv sync --locked" installs the core only
+uv sync --locked --all-extras     # or --extra api, --extra ui, ...; plain "uv sync --locked" installs the core only
+                                  # (extras: api, database, postgresql, ui, ml, llm, and deepeval for the older prototype)
 uv run playwright install chromium   # browser for the UI tests (or firefox, webkit)
 uv run ruff check src tests
 uv run pytest --collect-only      # collects every test without running it

@@ -1,7 +1,7 @@
 """API unit tests: everything mocked, no network. Needs the "api" extra."""
 
 try:
-    import httpx  # noqa: F401
+    import httpx, openapi_spec_validator  # noqa: E401,F401 - both: the "llm" extra installs httpx too
 except ImportError:  # the "api" extra is not installed: leave these tests out
     collect_ignore_glob = ["*.py"]
 else:

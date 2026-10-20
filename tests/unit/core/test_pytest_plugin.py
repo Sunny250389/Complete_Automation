@@ -214,3 +214,26 @@ def test_shared_run_id_from_configuration(project: pytest.Pytester, monkeypatch:
     project.runpytest_subprocess("-p", "no:cacheprovider", "--cauto-report").assert_outcomes(passed=1)
 
     assert (Path(project.path) / "reports" / "shared-run-42" / "results.json").is_file()
+
+
+def test_each_xdist_worker_writes_its_own_report(project: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("xdist")
+    monkeypatch.setenv("CAUTO_EXECUTION__RUN_ID", "parallel-run")
+    project.makepyfile("import pytest\n\n@pytest.mark.parametrize('n', range(6))\ndef test_ok(n):\n    pass\n")
+
+    project.runpytest_subprocess("-p", "no:cacheprovider", "--cauto-report", "-n", "2").assert_outcomes(passed=6)
+
+    files = sorted(p.name for p in (Path(project.path) / "reports" / "parallel-run").iterdir())
+    assert files == ["results-gw0.json", "results-gw1.json"]
+
+
+def test_a_session_started_from_a_worker_is_not_itself_a_worker(
+    project: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PYTEST_XDIST_WORKER", "gw3")  # inherited by any pytest a worker's test starts
+    monkeypatch.setenv("CAUTO_EXECUTION__RUN_ID", "nested-run")
+    project.makepyfile("def test_ok():\n    pass\n")
+
+    project.runpytest_subprocess("-p", "no:cacheprovider", "--cauto-report").assert_outcomes(passed=1)
+
+    assert [p.name for p in (Path(project.path) / "reports" / "nested-run").iterdir()] == ["results.json"]

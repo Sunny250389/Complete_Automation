@@ -61,11 +61,12 @@ def test_csv_summaries_are_tabular_and_complete(tmp_path) -> None:
     store = LocalArtifactStore(tmp_path)
     _, report = classification_report()
     _, refs = publish_report(report, store)
-    metrics = list(csv.DictReader(store.resolve(next(r for r in refs if r.name.startswith("metrics-"))).open()))
-    by_name = {row["metric"]: row for row in metrics}
+    metrics_text = store.resolve(next(r for r in refs if r.name.startswith("metrics-"))).read_text(encoding="utf-8")
+    by_name = {row["metric"]: row for row in csv.DictReader(metrics_text.splitlines())}
     assert float(by_name["accuracy"]["value"]) == pytest.approx(report.value("accuracy"))
     assert by_name["confusion_matrix"]["value"] == ""
-    matrix = list(csv.reader(store.resolve(next(r for r in refs if r.name.startswith("confusion"))).open()))
+    matrix_text = store.resolve(next(r for r in refs if r.name.startswith("confusion"))).read_text(encoding="utf-8")
+    matrix = list(csv.reader(matrix_text.splitlines()))
     assert matrix[0] == ["true\\predicted", "0", "1"] and sum(int(v) for row in matrix[1:] for v in row[1:]) == 200
 
 

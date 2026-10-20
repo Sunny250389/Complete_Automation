@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 try:
-    import httpx, sqlalchemy  # noqa: E401,F401
+    import httpx, openapi_spec_validator, sqlalchemy  # noqa: E401,F401
 except ImportError:  # the "api" or "database" extra is not installed: leave these tests out
     collect_ignore_glob = ["*.py"]
 else:

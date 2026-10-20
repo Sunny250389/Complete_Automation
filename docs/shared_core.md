@@ -292,7 +292,7 @@ pytest_plugins = ["complete_automation.core.pytest_plugin", "pytester"]
 
 **Module and tags:** `@pytest.mark.cauto_module("api")` sets `module`; otherwise the folder under `tests/` is used. Other marker names become `tags`.
 
-**Parallel runs:** under pytest-xdist, each worker writes `results-<worker>.json`. Set `CAUTO_EXECUTION__RUN_ID` to put all workers in one run folder. Merging worker files is not implemented.
+**Parallel runs:** under pytest-xdist, each worker writes `results-<worker>.json` and the controller, which runs no tests, writes no report. Workers are recognised by xdist's own worker configuration, so a pytest session that a test starts (pytester, a subprocess) is never mistaken for one. Set `CAUTO_EXECUTION__RUN_ID` to put all workers in one run folder; `core.summary` combines the worker files.
 
 ## Test data
 
@@ -338,7 +338,7 @@ def fetch_status(): ...
 
 ## Extending the core from a module
 
-A future API module, for example:
+Every testing module follows this pattern. A simplified sketch (the real API module is `src/complete_automation/api/settings.py` and `api/pytest_plugin.py`; see also [integration_and_ci.md](integration_and_ci.md#extending-the-framework)):
 
 ```python
 # complete_automation/api/settings.py
@@ -356,7 +356,7 @@ def api_settings(framework_settings):
 def test_list_users(api_client, artifact_store, result_recorder):
     response = api_client.get("/users")
     result_recorder.attach(artifact_store.write_json("response.json", response.json(), subdir="api"))
-    result_recorder.add_metric("latency", response.elapsed_ms, unit="ms")
+    result_recorder.add_metric("latency", response.latency_ms, unit="ms")
     assert response.status_code == 200
 ```
 

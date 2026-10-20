@@ -21,7 +21,7 @@ from typing import Any
 
 import pytest
 
-for _extra in ("httpx", "jsonschema", "sqlalchemy", "numpy", "pandas", "sklearn"):
+for _extra in ("httpx", "jsonschema", "openapi_spec_validator", "sqlalchemy", "numpy", "pandas", "sklearn"):
     pytest.importorskip(_extra)
 
 pytestmark = [pytest.mark.integration, pytest.mark.cross_module, pytest.mark.cauto_module("cross_module")]
