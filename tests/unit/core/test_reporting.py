@@ -9,6 +9,8 @@ from complete_automation.core.exceptions import ReportingError
 from complete_automation.core.reporting import JsonReporter, Reporter, summarize
 from complete_automation.core.results import ErrorCategory, FailureInfo, MetricResult, Status, TestResult
 
+pytestmark = pytest.mark.cauto_module("core")
+
 START = datetime(2026, 10, 16, 9, 0, tzinfo=UTC)
 
 

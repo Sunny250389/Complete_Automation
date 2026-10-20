@@ -2,6 +2,8 @@ import pytest
 
 from complete_automation.core.assertions import assert_keys_present, assert_subset
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 def test_keys_present_passes() -> None:
     assert_keys_present({"id": 1, "name": "a", "extra": True}, ["id", "name"])

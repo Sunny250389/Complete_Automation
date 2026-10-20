@@ -9,6 +9,8 @@ from complete_automation.core.artifacts import ArtifactRef, ArtifactStore, Local
 from complete_automation.core.exceptions import ArtifactError
 from complete_automation.core.results import Status, TestResult
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 @pytest.fixture
 def store(tmp_path: Path) -> LocalArtifactStore:

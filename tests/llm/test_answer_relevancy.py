@@ -1,8 +1,11 @@
 """Answer relevancy regression suite."""
 
+import pytest
 from deepeval.evaluate import evaluate
 
 from complete_automation.metrics.deepeval_metrics import answer_relevancy_metric
+
+pytestmark = pytest.mark.live
 
 
 def test_answer_relevancy_for_dataset(llm_test_cases):

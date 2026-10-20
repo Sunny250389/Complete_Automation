@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.cauto_module("core")
+
 PLUGIN_CONFTEST = 'pytest_plugins = ["complete_automation.core.pytest_plugin"]\n'
 
 

@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.cauto_module("core")
+
 CORE = Path(__file__).resolve().parents[3] / "src" / "complete_automation" / "core"
 MODULES = sorted(p.stem for p in CORE.glob("*.py") if p.stem != "__init__")
 DOMAIN_PACKAGES = ("deepeval", "openai", "anthropic", "ollama", "httpx", "requests", "sqlalchemy",

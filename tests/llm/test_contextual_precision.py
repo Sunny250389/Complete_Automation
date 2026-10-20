@@ -1,8 +1,11 @@
 """Contextual precision checks for retrieval-grounded outputs."""
 
+import pytest
 from deepeval.evaluate import evaluate
 
 from complete_automation.metrics.deepeval_metrics import contextual_precision_metric
+
+pytestmark = pytest.mark.live
 
 
 def test_contextual_precision_for_dataset(llm_test_cases):

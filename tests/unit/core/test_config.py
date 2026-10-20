@@ -6,6 +6,8 @@ from pydantic import BaseModel, SecretStr, ValidationError
 from complete_automation.core.config import FrameworkSettings, load_settings
 from complete_automation.core.exceptions import ConfigurationError
 
+pytestmark = pytest.mark.cauto_module("core")
+
 REPO_CONFIG = Path(__file__).resolve().parents[3] / "config"
 
 

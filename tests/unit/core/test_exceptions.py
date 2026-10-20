@@ -11,6 +11,8 @@ from complete_automation.core.exceptions import (
     classify_exception,
 )
 
+pytestmark = pytest.mark.cauto_module("core")
+
 
 @pytest.mark.parametrize(
     ("error", "category"),

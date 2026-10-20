@@ -16,6 +16,8 @@ from complete_automation.core.results import (
     TestResult,
 )
 
+pytestmark = pytest.mark.cauto_module("core")
+
 START = datetime(2026, 10, 16, 9, 0, 0, tzinfo=UTC)
 END = START + timedelta(seconds=1.5)
 

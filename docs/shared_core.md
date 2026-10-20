@@ -15,6 +15,7 @@
 | `core/context.py` | `RunContext`, `TestContext`, current-context tracking |
 | `core/results.py` | `TestResult`, `Status`, `MetricResult`, `FailureInfo`, `AttemptInfo` |
 | `core/reporting.py` | `Reporter` protocol, `JsonReporter`, `summarize` |
+| `core/summary.py` | Markdown summary of one or more JSON reports (`python -m complete_automation.core.summary`) |
 | `core/artifacts.py` | `ArtifactStore` protocol, `LocalArtifactStore`, `ArtifactRef` |
 | `core/datasets.py` | JSON, YAML, CSV and xlsx loaders, `DataLoader`, `validate_records`, `DataFactory` |
 | `core/retry.py` | `RetryPolicy`, `call_with_retry`, `retrying` |
@@ -230,6 +231,8 @@ The JSON document is written atomically, with sorted keys:
 **What the reporter does not do:** it counts statuses and passes metrics through unchanged. It never recomputes them.
 
 **Failure behaviour:** publishing after `finalize`, a non-`TestResult` input, or a write failure raises `ReportingError`. In a pytest run, that error makes the session fail.
+
+**Markdown summary.** `python -m complete_automation.core.summary "reports/<run_id>/results*.json" [--output FILE] [--title TEXT]` reads one or more reports (worker files or several jobs are combined), rebuilds each `TestResult` and recounts with `summarize`. It prints totals, one row per module, the tests that did not pass grouped by cause (quality gate, assertion, service or infrastructure, other error, incomplete) with their failed metrics and artifacts, and skips grouped by reason. `--output` appends instead of printing (CI writes to `$GITHUB_STEP_SUMMARY`). It exits 0 once the reports were read and 2 when none matched or one is invalid; whether the run failed is pytest's exit status.
 
 ## Artifacts
 
