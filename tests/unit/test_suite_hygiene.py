@@ -5,6 +5,7 @@ that used to break them.
 """
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,7 @@ import pytest
 pytestmark = [pytest.mark.cross_module, pytest.mark.cauto_module("cross_module")]
 
 ROOT = Path(__file__).resolve().parents[2]
+ANSI_COLOR = re.compile(r"\x1b\[[0-9;]*m")  # CI sets FORCE_COLOR, which colors the inner run's report
 
 # What docs/integration_and_ci.md tells a developer to export for live tests, plus common overrides.
 EXPORTED_FOR_LIVE_TESTS = {
@@ -71,6 +73,7 @@ def test_the_legacy_deepeval_suite_without_a_judge_skips_and_creates_no_run_dire
 
     after = {path.name for path in reports.glob("run_*")} if reports.is_dir() else set()
     assert completed.returncode == 0, completed.stdout[-3000:]
-    skipped = [line for line in completed.stdout.splitlines() if line.startswith("SKIPPED")]
-    assert len(skipped) == 2 and all("DeepEval judge not configured" in line for line in skipped), completed.stdout
+    output = ANSI_COLOR.sub("", completed.stdout)
+    skipped = [line for line in output.splitlines() if line.startswith("SKIPPED")]
+    assert len(skipped) == 2 and all("DeepEval judge not configured" in line for line in skipped), output
     assert after == before
