@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "pytest>=8.2.0",
-    "deepeval>=1.0.0",
     "python-dotenv>=1.0.1",
     "pydantic>=2.7,<3",
     "PyYAML>=6.0,<7",
@@ -40,6 +39,10 @@ ml = [
     "numpy>=2.0,<3",
     "pandas>=2.2,<4",
     "scikit-learn>=1.5,<2",
+]
+# The older DeepEval prototype (src/complete_automation/metrics, tests/llm) only.
+deepeval = [
+    "deepeval>=1.0.0",
 ]
 
 [dependency-groups]

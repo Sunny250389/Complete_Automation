@@ -6,6 +6,7 @@ share this process) and inspects the shared-core JSON report and artifact store 
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -17,6 +18,16 @@ CONFTEST = (
 )
 PAGE = "<h1>Checkout</h1><p id='state'>ready</p>"
 SECRET = "not-a-real-secret-value"
+
+# pytester points HOME at a temporary folder for each inner run. Playwright keeps its browsers under HOME on
+# Linux and macOS (Windows uses LOCALAPPDATA, which pytester leaves alone), so the inner runs must be pointed
+# at the cache this process resolves, or they cannot find the browsers that were installed for this suite.
+if sys.platform == "darwin":
+    BROWSER_CACHE: Path | None = Path.home() / "Library" / "Caches" / "ms-playwright"
+elif sys.platform.startswith("linux"):
+    BROWSER_CACHE = Path.home() / ".cache" / "ms-playwright"
+else:
+    BROWSER_CACHE = None
 
 TESTS = f"""
 import pytest
@@ -59,6 +70,8 @@ def project(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):  # type
             body += "modules:\n  ui:\n" + "".join(f"    {line}\n" for line in ui_yaml.strip().splitlines())
         (config / "environments" / "dev.yaml").write_text(body, encoding="utf-8")
         monkeypatch.setenv("CAUTO_CONFIG_DIR", str(config))
+        if BROWSER_CACHE is not None and "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
+            monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(BROWSER_CACHE))
         pytester.makeconftest(CONFTEST)
         return pytester.path
 

@@ -2,7 +2,7 @@
 
 Load in the ``conftest.py`` of API test folders::
 
-    pytest.importorskip("httpx")  # skip cleanly without the "api" extra
+    pytest.importorskip("openapi_spec_validator")  # skip cleanly without the "api" extra (httpx alone is also in "llm")
     from complete_automation.api.pytest_plugin import *  # noqa: F401,F403
 
 Fixtures (none autouse, none touches the network while being set up):

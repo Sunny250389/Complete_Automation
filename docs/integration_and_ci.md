@@ -167,7 +167,7 @@ uv run python -m complete_automation.core.summary "reports/<run_id>/results*.jso
 
 ## Configuration
 
-All modules read the shared configuration: `config/environments/<env>.yaml`, then `CAUTO_*` values in `.env`, then `CAUTO_*` environment variables; later sources win (full rules in [shared_core.md](shared_core.md#configuration)). There is no second configuration system, apart from the legacy DeepEval suite's own `config/settings.py`.
+All modules read the shared configuration: `config/environments/<env>.yaml`, then `CAUTO_*` values in `.env`, then `CAUTO_*` environment variables; later sources win (full rules in [shared_core.md](shared_core.md#configuration)). There is no second configuration system, apart from the legacy DeepEval suite's own `src/complete_automation/config/settings.py`.
 
 | Environment | Use |
 | --- | --- |
@@ -185,7 +185,7 @@ All modules read the shared configuration: `config/environments/<env>.yaml`, the
 | Real Ollama | Ollama running; `CAUTO_MODULES__LLM_EVALUATION__MODEL` (and optionally `__JUDGE_MODEL`) |
 | PostgreSQL | `--cauto-env postgres_test` and `CAUTO_MODULES__DATABASE__USERNAME` / `__PASSWORD` |
 | Live API | `--cauto-env reqres` and `CAUTO_MODULES__API__AUTH__VALUE` |
-| DeepEval suite (`tests/llm`) | `OPENAI_API_KEY` (DeepEval's default judge) |
+| DeepEval suite (`tests/llm`) | `uv sync --extra deepeval` and `OPENAI_API_KEY` (DeepEval's default judge) |
 
 Secrets go in environment variables or a local `.env` (git ignores it), never in YAML. Each module validates its section when a test first needs it, so a module's tests never require another module's settings.
 
@@ -203,6 +203,10 @@ The unit and integration jobs run in parallel. Each writes a JUnit file and the 
 
 **Not in CI**, because the runners have no such service: real Ollama models, PostgreSQL, live external APIs and the DeepEval judge. Those tests are collected and reported as skipped with their reason; run them locally with the commands above. Dependencies come from `uv.lock` (`--locked`); the uv cache is keyed on it.
 
+### Where output accumulates
+
+Every run that writes a report gets its own `reports/<run_id>/` and `artifacts/<run_id>/` folder (both ignored by git). Nothing deletes them: the folders of earlier runs are what lets you compare runs. Remove old ones when they are no longer needed, for example `rm -rf reports/* artifacts/*`. Tests that start their own pytest session (plugin self-tests) write into pytest's temporary directory, which pytest prunes itself (it keeps the last three).
+
 ## Diagnosing a failure
 
 1. In CI, open the job summary: the failing test, its category, message and artifact names.
@@ -213,7 +217,16 @@ The unit and integration jobs run in parallel. Each writes a JUnit file and the 
 
 ## Isolation and parallel execution
 
-Tests do not depend on order: each cross-module test has its own application and database, API test services reset per test, browser contexts are per test. pytest-xdist is not a dependency and parallel runs are not part of the supported setup: each worker would write its own report file (`results-<worker>.json`, which `core.summary` can combine), and the browser is shared per module within a process. Run serially unless you have verified your selection under xdist.
+Tests do not depend on order: each cross-module test has its own application and database, API test services reset per test, browser contexts are per test.
+
+**Parallel runs.** pytest-xdist is not a project dependency; bring it in for a run:
+
+```bash
+uv run --with pytest-xdist pytest -n 4 tests/unit
+CAUTO_EXECUTION__RUN_ID=my-run uv run --with pytest-xdist pytest -n 4 tests/integration tests/examples --cauto-report
+```
+
+The unit suite and the local integration and example suites pass with `-n 4` (Phase 8, Windows). Each worker writes its own `results-gw<N>.json` and the controller writes none; without `CAUTO_EXECUTION__RUN_ID` every worker gets its own run ID and folder. `python -m complete_automation.core.summary "reports/my-run/results*.json"` combines the worker files. CI runs serially.
 
 ## Extending the framework
 
@@ -228,4 +241,4 @@ Tests do not depend on order: each cross-module test has its own application and
 - A missing prerequisite is reported as a skip with its reason; there is no separate "blocked" status in the result contract.
 - An LLM judge failure is reported as `error` with category `unknown`, because `EvaluatorError` declares no more specific category.
 - The users application is a test fixture: no authentication, single writer (SQLite).
-- Parallel execution (pytest-xdist) is not verified.
+- Parallel execution (pytest-xdist) is verified locally for the unit, integration and example suites, not in CI; real-model and PostgreSQL tests were not run in parallel.
