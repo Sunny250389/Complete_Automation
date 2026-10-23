@@ -155,9 +155,10 @@ def test_configured_extra_keys_are_redacted() -> None:
         LoggingSettings(format="json"), redactor=Redactor(extra_keys=["pin"]), stream=stream
     )
 
-    get_logger("extra").info("x", extra={"pin": "1234"})
+    # A value no timestamp or run id can contain: "1234" appears in run ids logged at 00:12:34 UTC.
+    get_logger("extra").info("x", extra={"pin": "pin-value-not-to-log"})
 
-    assert "1234" not in stream.getvalue()
+    assert "pin-value-not-to-log" not in stream.getvalue()
 
 
 def test_file_logging(tmp_path: Path) -> None:
