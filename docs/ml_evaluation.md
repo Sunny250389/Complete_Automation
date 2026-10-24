@@ -4,7 +4,7 @@
 
 Everything shared comes from [the shared core](shared_core.md): configuration (`modules.ml`), `TestResult`/`ResultRecorder`, `ArtifactStore`, the data loaders, the `Redactor` and the error categories. The ML module adds no second version of any of them.
 
-**Boundaries.** The module imports only `complete_automation.core` plus numpy, pandas and scikit-learn. It has no HTTP, database, browser or LLM code, and the core and the other modules never import it. LLM evaluation (Phase 6) is out of scope. `tests/unit/ml/test_architecture.py` enforces this, and also that the module contains no `fit` calls, no pickle/joblib loading and no `eval`/`exec`.
+**Boundaries.** The module imports only `complete_automation.core` plus numpy, pandas and scikit-learn. It has no HTTP, database, browser or LLM code, and the core and the other modules never import it. LLM evaluation is a separate module and is out of scope here. `tests/unit/ml/test_architecture.py` enforces this, and also that the module contains no `fit` calls, no pickle/joblib loading and no `eval`/`exec`.
 
 ## Installation and commands
 

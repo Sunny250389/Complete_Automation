@@ -1,0 +1,92 @@
+name: Live LLM evaluation
+
+# Manual only. Installs a pinned Ollama on the runner, pulls one model and runs the llm_live tests
+# against it. Not part of the CI pipeline: it downloads a model and can take a long time.
+# See docs/llm_evaluation.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Ollama model to test, exactly as `ollama list` names it (for example qwen3:4b)"
+        required: true
+        default: "qwen3:4b"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-llm-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12" # the lowest version pyproject.toml allows
+  FORCE_COLOR: "1"
+  OLLAMA_VERSION: "0.40.8"
+  OLLAMA_MODEL: ${{ inputs.model }}
+
+jobs:
+  live:
+    name: Real Ollama model
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies (llm extra)
+        run: uv sync --locked --extra llm
+
+      - name: Install the pinned Ollama release
+        run: |
+          curl -fsSL -o ollama.tgz "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tgz"
+          sudo tar -C /usr/local -xzf ollama.tgz
+          ollama --version
+
+      - name: Start the server and pull the model
+        run: |
+          nohup ollama serve > ollama.log 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:11434/api/tags > /dev/null 2>&1 && break
+            sleep 2
+          done
+          ollama pull "$OLLAMA_MODEL"
+          ollama list
+
+      - name: Live LLM evaluation tests
+        env:
+          CAUTO_MODULES__LLM_EVALUATION__MODEL: ${{ env.OLLAMA_MODEL }}
+          CAUTO_MODULES__LLM_EVALUATION__REQUIRE_MODEL: "true"
+        run: uv run pytest -m llm_live --cauto-env ollama_local --junitxml=reports/junit-live.xml
+
+      - name: Job summary
+        if: always()
+        run: uv run python -m complete_automation.core.summary "reports/*/results*.json" --title "Live LLM evaluation" --output "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-llm-report
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload the evaluation artifacts and the Ollama log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-llm-artifacts
+          path: |
+            artifacts/
+            ollama.log
+          if-no-files-found: ignore
+          retention-days: 7

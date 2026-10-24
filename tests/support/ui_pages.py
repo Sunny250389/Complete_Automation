@@ -31,6 +31,32 @@ class HomePage(BasePage):
         return RegistrationPage(self.page, self.base_url)
 
 
+class LoginPage(BasePage):
+    path = "/login.html"
+
+    def __init__(self, page: Page, base_url: str | None = None) -> None:
+        super().__init__(page, base_url)
+        self.heading = self.by_role("heading", "Sign in")
+        self.email = FormField(page, "Email address", error_test_id="email-error")
+        self.password = FormField(page, "Password", error_test_id="password-error")
+        self.submit_button = self.by_role("button", "Sign in")
+        self.login_error = Notice(page, "login-error")
+
+    def sign_in(self, email: str, password: str) -> None:
+        self.email.fill(email)
+        self.password.fill(password)
+        self.click(self.submit_button)
+
+
+class AccountPage(BasePage):
+    path = "/account.html"
+
+    def __init__(self, page: Page, base_url: str | None = None) -> None:
+        super().__init__(page, base_url)
+        self.heading = self.by_role("heading", "My account")
+        self.signed_in = Notice(page, "signed-in")
+
+
 class RegistrationPage(BasePage):
     path = "/form.html"
 

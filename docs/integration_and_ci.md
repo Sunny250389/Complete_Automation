@@ -201,7 +201,7 @@ GitHub Actions, `.github/workflows/ci.yml`. It runs on pushes to `main`, on pull
 
 The unit and integration jobs run in parallel. Each writes a JUnit file and the JSON report, adds the Markdown summary to the job page, and uploads `reports/` (14 days); the integration job also uploads `artifacts/` (7 days): API exchanges and database histories of failed tests, screenshots, ML and LLM evaluation files. A failing test fails its job and the pipeline; the summary and upload steps run anyway.
 
-**Not in CI**, because the runners have no such service: real Ollama models, PostgreSQL, live external APIs and the DeepEval judge. Those tests are collected and reported as skipped with their reason; run them locally with the commands above. Dependencies come from `uv.lock` (`--locked`); the uv cache is keyed on it.
+**Not run in CI**, because the runners have no such service: real Ollama models, PostgreSQL, live external APIs and the DeepEval judge. The CI job installs every extra (`--all-extras`, which includes `deepeval`), so those tests are collected and reported as skipped with their reason; run them locally with the commands above. Dependencies come from `uv.lock` (`--locked`); the uv cache is keyed on it.
 
 ### Where output accumulates
 
@@ -237,7 +237,7 @@ The unit suite and the local integration and example suites pass with `-n 4` (Ph
 ## Known limitations
 
 - **CI on GitHub has not run this pipeline yet.** It was validated with actionlint and by running every job's commands on Linux (Ubuntu 26.04, Python 3.12) and Windows (Python 3.14). The previous pipeline has failed on `main` since Phase 4 in its integration step; the same command passes in every local reproduction, so the cause could not be confirmed. The new jobs publish JUnit, the JSON report, artifacts and a summary so the next failure can be read without the raw log.
-- Real Ollama, PostgreSQL, live API and DeepEval tests do not run in CI.
+- Real Ollama, PostgreSQL, live API and DeepEval tests are skipped in CI, not run.
 - A missing prerequisite is reported as a skip with its reason; there is no separate "blocked" status in the result contract.
 - An LLM judge failure is reported as `error` with category `unknown`, because `EvaluatorError` declares no more specific category.
 - The users application is a test fixture: no authentication, single writer (SQLite).

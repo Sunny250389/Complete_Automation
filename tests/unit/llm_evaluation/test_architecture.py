@@ -1,6 +1,7 @@
 """The LLM evaluation module depends on the shared core only, executes no model output, and is inert on import."""
 
 import ast
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -31,12 +32,21 @@ def _imports(path: Path) -> list[str]:
     return names
 
 
+ALLOWED_LIBRARIES = {"httpx", "jsonschema", "pydantic", "pytest"}  # plus the standard library
+
+
+def _allowed(name: str) -> bool:
+    root = name.split(".")[0]
+    if root == "complete_automation":
+        return name.startswith(("complete_automation.core", "complete_automation.llm_evaluation"))
+    return root in sys.stdlib_module_names or root in ALLOWED_LIBRARIES
+
+
 @pytest.mark.parametrize("module", MODULES)
-def test_imports_only_core_llm_evaluation_and_declared_libraries(module: str) -> None:
+def test_imports_only_core_llm_evaluation_stdlib_and_declared_libraries(module: str) -> None:
     for name in _imports(LLM / module):
         assert not name.startswith(FORBIDDEN), f"llm_evaluation/{module} imports {name}"
-        if name.startswith("complete_automation."):
-            assert name.startswith(("complete_automation.core", "complete_automation.llm_evaluation")), name
+        assert _allowed(name), f"llm_evaluation/{module} imports {name}, which is not allowed"
 
 
 def test_model_output_is_never_executed_or_unsafely_deserialised() -> None:
@@ -71,7 +81,11 @@ def test_import_reads_no_files_opens_no_connection_and_configures_no_logging() -
     assert done.returncode == 0, done.stderr
 
 
-def test_the_only_network_target_is_the_configured_base_url() -> None:
+URL_LITERAL = re.compile(r"https?://[^\s\"']+")
+
+
+def test_the_only_network_target_is_the_default_base_url() -> None:
+    # The only URL literal allowed is the default endpoint; every request goes to the configured base_url.
     for module in MODULES:
-        source = (LLM / module).read_text(encoding="utf-8")
-        assert "http://" not in source.replace("http://localhost:11434", "") or module.startswith(("settings", "schemas")), module
+        urls = set(URL_LITERAL.findall((LLM / module).read_text(encoding="utf-8")))
+        assert urls <= {"http://localhost:11434"}, f"{module}: {sorted(urls)}"
