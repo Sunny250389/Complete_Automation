@@ -1,0 +1,5 @@
+[
+  {"case_id": "valid-account", "email": "ada@example.test", "password": "practice-pass-1", "expect": "signed_in"},
+  {"case_id": "wrong-password", "email": "ada@example.test", "password": "not-the-password", "expect": "rejected"},
+  {"case_id": "unknown-account", "email": "nobody@example.test", "password": "practice-pass-1", "expect": "rejected"}
+]

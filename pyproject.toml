@@ -60,8 +60,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 testpaths = ["tests"]
 markers = [
-    "smoke: quick health checks for llm app",
-    "regression: full llm evaluation sweep",
+    "smoke: quick health checks",
     "api: API automation tests",
     "database: database testing module tests",
     "ml: ML model evaluation tests (need the ml extra: numpy, pandas, scikit-learn)",

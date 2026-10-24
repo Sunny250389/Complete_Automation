@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Practice Site - Account</title>
+</head>
+<body>
+  <main>
+    <h1>My account</h1>
+    <p data-testid="signed-in" role="status"></p>
+    <p><a href="login.html" data-testid="sign-out">Sign out</a></p>
+  </main>
+  <script>
+    var email = sessionStorage.getItem("signedInAs");
+    var box = document.querySelector('[data-testid="signed-in"]');
+    if (email) {
+      box.textContent = "Signed in as " + email;
+    } else {
+      box.textContent = "Not signed in";
+    }
+    document.querySelector('[data-testid="sign-out"]').addEventListener("click", function () {
+      sessionStorage.removeItem("signedInAs");
+    });
+  </script>
+</body>
+</html>
